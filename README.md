@@ -20,53 +20,63 @@ Implementation using Python code
 Testing the server and client 
 
 ## PROGRAM:
-# client:
-```
+
+### Server code:
+```python
 import socket
 
-s=socket.socket()
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 
-s.connect(('localhost',65124))
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    try:
+        s.bind((HOST, PORT))
+    except Exception as e:
+        print(f"Error binding to {HOST}:{PORT}: {e}")
+        exit()
+    
+    s.listen()
+    print(f"Listening on {HOST}:{PORT}...")
 
-while(1):
+    try:
+        conn, addr = s.accept()
+    except Exception as e:
+        print(f"Error accepting connection: {e}")
+        exit()
 
-  msg=input("Client>")
+    with conn:
+        print(f"Connected by {addr}")
+        while True:
+            try:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                conn.sendall(data)
+            except Exception as e:
+                print(f"Error receiving/sending data: {e}")
+                exit()
 
-  s.send(msg.encode())
-
-  print("Server>"+s.recv(1024).decode())
 
 ```
-# server:
-```
-
+### Client Code:
+```python
 import socket
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT = 65432  # The port used by the server
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((HOST, PORT))
+    s.sendall(b"Hello, world")
+    data = s.recv(1024)
 
-s=socket.socket()
-
-s.bind(('localhost',65124))
-
-s.listen(5)
-
-c,addr=s.accept()
-
-while(1):
-
-   msg=c.recv(1024).decode()
-
-   print(msg)
-
-   c.send(msg.encode())
-
+print(f"Received {data!r}")
 ```
+
 ## OUTPUT:
+### Server side:
+![238239195-07c565aa-aa58-42b2-955b-4924f2ec7bb7](https://github.com/Yogeshvar005/Echoserver/assets/113497367/a6d896eb-bb90-4144-b78e-dac413af0b5b)
 
-# SERVER:
-![eth echoserver2](https://github.com/user-attachments/assets/bcb039ef-f526-4e13-9acd-71bb7d258dc6)
-
-# CLIENT:
-![eth echoserver1](https://github.com/user-attachments/assets/b74a7dfe-2eab-42a8-b422-35ed03ee96b7)
-
+### Client side:
+![238239247-573f26b2-b5d9-414e-9a03-836c8f627306](https://github.com/Yogeshvar005/Echoserver/assets/113497367/d36b87d7-902a-4d09-983a-4745f693999b)
 
 ## RESULT:
-The program is executed successfully
+The program is executed successfully.
